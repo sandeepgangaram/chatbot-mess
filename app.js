@@ -5,8 +5,9 @@ const express = require("express");
 const crypto = require("crypto");
 const bodyParser = require("body-parser");
 const request = require("request");
-const app = express();
 const uuid = require("uuid");
+
+const app = express();
 
 // Messenger API parameters
 if (!process.env.FB_PAGE_TOKEN) {
