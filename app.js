@@ -1,7 +1,6 @@
 "use strict";
 
 const dialogflow = require("dialogflow");
-const config = require("./config");
 const express = require("express");
 const crypto = require("crypto");
 const bodyParser = require("body-parser");
@@ -16,10 +15,10 @@ if (!process.env.FB_PAGE_TOKEN) {
 if (!process.env.FB_VERIFY_TOKEN) {
   throw new Error("missing FB_VERIFY_TOKEN");
 }
-if (!config.GOOGLE_PROJECT_ID) {
+if (!process.env.GOOGLE_PROJECT_ID) {
   throw new Error("missing GOOGLE_PROJECT_ID");
 }
-if (!config.DF_LANGUAGE_CODE) {
+if (!process.env.DF_LANGUAGE_CODE) {
   throw new Error("missing DF_LANGUAGE_CODE");
 }
 if (!process.env.GOOGLE_CLIENT_EMAIL) {
@@ -31,7 +30,7 @@ if (!process.env.GOOGLE_PRIVATE_KEY) {
 if (!process.env.FB_APP_SECRET) {
   throw new Error("missing FB_APP_SECRET");
 }
-if (!config.SERVER_URL) {
+if (!process.env.SERVER_URL) {
   //used for ink to static files
   throw new Error("missing SERVER_URL");
 }
@@ -64,7 +63,7 @@ const credentials = {
 };
 
 const sessionClient = new dialogflow.SessionsClient({
-  projectId: config.GOOGLE_PROJECT_ID,
+  projectId: process.env.GOOGLE_PROJECT_ID,
   credentials,
 });
 
@@ -80,7 +79,7 @@ app.get("/webhook/", function (req, res) {
   console.log("request");
   if (
     req.query["hub.mode"] === "subscribe" &&
-    req.query["hub.verify_token"] === config.FB_VERIFY_TOKEN
+    req.query["hub.verify_token"] === process.env.FB_VERIFY_TOKEN
   ) {
     res.status(200).send(req.query["hub.challenge"]);
   } else {
@@ -339,7 +338,7 @@ async function sendToDialogFlow(sender, textString, params) {
 
   try {
     const sessionPath = sessionClient.sessionPath(
-      config.GOOGLE_PROJECT_ID,
+      process.env.GOOGLE_PROJECT_ID,
       sessionIds.get(sender)
     );
 
@@ -348,7 +347,7 @@ async function sendToDialogFlow(sender, textString, params) {
       queryInput: {
         text: {
           text: textString,
-          languageCode: config.DF_LANGUAGE_CODE,
+          languageCode: process.env.DF_LANGUAGE_CODE,
         },
       },
       queryParams: {
@@ -414,7 +413,7 @@ function sendGifMessage(recipientId) {
       attachment: {
         type: "image",
         payload: {
-          url: config.SERVER_URL + "/assets/instagram_logo.gif",
+          url: process.env.SERVER_URL + "/assets/instagram_logo.gif",
         },
       },
     },
@@ -436,7 +435,7 @@ function sendAudioMessage(recipientId) {
       attachment: {
         type: "audio",
         payload: {
-          url: config.SERVER_URL + "/assets/sample.mp3",
+          url: process.env.SERVER_URL + "/assets/sample.mp3",
         },
       },
     },
@@ -458,7 +457,7 @@ function sendVideoMessage(recipientId, videoName) {
       attachment: {
         type: "video",
         payload: {
-          url: config.SERVER_URL + videoName,
+          url: process.env.SERVER_URL + videoName,
         },
       },
     },
@@ -480,7 +479,7 @@ function sendFileMessage(recipientId, fileName) {
       attachment: {
         type: "file",
         payload: {
-          url: config.SERVER_URL + fileName,
+          url: process.env.SERVER_URL + fileName,
         },
       },
     },
@@ -654,7 +653,7 @@ function sendAccountLinking(recipientId) {
           buttons: [
             {
               type: "account_link",
-              url: config.SERVER_URL + "/authorize",
+              url: process.env.SERVER_URL + "/authorize",
             },
           ],
         },
@@ -675,7 +674,7 @@ function callSendAPI(messageData) {
     {
       uri: "https://graph.facebook.com/v3.2/me/messages",
       qs: {
-        access_token: config.FB_PAGE_TOKEN,
+        access_token: process.env.FB_PAGE_TOKEN,
       },
       method: "POST",
       json: messageData,
@@ -870,7 +869,7 @@ function verifyRequestSignature(req, res, buf) {
     var signatureHash = elements[1];
 
     var expectedHash = crypto
-      .createHmac("sha1", config.FB_APP_SECRET)
+      .createHmac("sha1", process.env.FB_APP_SECRET)
       .update(buf)
       .digest("hex");
 
