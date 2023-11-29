@@ -16,7 +16,7 @@ if (!process.env.FB_PAGE_TOKEN) {
 if (!process.env.FB_VERIFY_TOKEN) {
   throw new Error("missing FB_VERIFY_TOKEN");
 }
-if (!process.env.GOOGLE_PROJECT_ID) {
+if (!config.GOOGLE_PROJECT_ID) {
   throw new Error("missing GOOGLE_PROJECT_ID");
 }
 if (!config.DF_LANGUAGE_CODE) {
@@ -64,7 +64,7 @@ const credentials = {
 };
 
 const sessionClient = new dialogflow.SessionsClient({
-  projectId: process.env.GOOGLE_PROJECT_ID,
+  projectId: config.env.GOOGLE_PROJECT_ID,
   credentials,
 });
 
@@ -339,7 +339,7 @@ async function sendToDialogFlow(sender, textString, params) {
 
   try {
     const sessionPath = sessionClient.sessionPath(
-      process.env.GOOGLE_PROJECT_ID,
+      config.GOOGLE_PROJECT_ID,
       sessionIds.get(sender)
     );
 
